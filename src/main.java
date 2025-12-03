@@ -1,4 +1,5 @@
 
+import java.io.PrintStream;
 import java.util.Scanner;
 
 /*
@@ -14,6 +15,13 @@ public class main {
     private static Scanner sc = new Scanner(System.in);
     
     public static void main(String[] args){
+        try{
+            System.setOut(new PrintStream(System.out, true, "UTF-8"));
+        }catch (Exception e){
+            
+        }
+        
+        
         mostrarBienvenida();
         
         boolean salir = false;
@@ -61,31 +69,33 @@ public class main {
     //Mensaje de bienvenida
     private static void mostrarBienvenida(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                                                            ║");
-        System.out.println("║                    TARBO-RED v1.0                          ║");
-        System.out.println("║         Sistema de Gestion de Reservas de Cine            ║");
-        System.out.println("║                                                            ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println();
+        System.out.println("\n\n");
+        System.out.println("  ================================================");
+        System.out.println("                                                  ");
+        System.out.println("                  TARBO-RED v1.0                  ");
+        System.out.println("       Sistema de Gestion de Reservas de Cine    ");
+        System.out.println("                                                  ");
+        System.out.println("  ================================================");
+        System.out.println("\n");
         pausar();
     }
     
     //Menu principal
     private static void mostrarMenuPrincipal(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                      MENU PRINCIPAL                        ║");
-        System.out.println("╠════════════════════════════════════════════════════════════╣");
-        System.out.println("║  1. Ver Cartelera de Peliculas                             ║");
-        System.out.println("║  2. Hacer una Reserva                                      ║");
-        System.out.println("║  3. Ver Mis Reservas                                       ║");
-        System.out.println("║  4. Buscar Reserva                                         ║");
-        System.out.println("║  5. Cancelar Reserva                                       ║");
-        System.out.println("║  6. Ver Estadisticas                                       ║");
-        System.out.println("║  0. Salir del Sistema                                      ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.print("\n➤ Seleccione una opcion: ");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("             MENU PRINCIPAL");
+        System.out.println("  ==========================================\n");
+        System.out.println("     [1] Ver Cartelera de Peliculas");
+        System.out.println("     [2] Hacer una Reserva");
+        System.out.println("     [3] Ver Mis Reservas");
+        System.out.println("     [4] Buscar Reserva");
+        System.out.println("     [5] Cancelar Reserva");
+        System.out.println("     [6] Ver Estadisticas");
+        System.out.println("     [0] Salir del Sistema\n");
+        System.out.println("  ==========================================");
+        System.out.print("\n  Opcion: ");
     }
     
     //Leer opcion validada
@@ -103,77 +113,86 @@ public class main {
     //Placeholder para visualizar la cartelera
     private static void verCartelera(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                  CARTELERA DE PELICULAS                    ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("          CARTELERA DE PELICULAS");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Placeholder para hacer reserva
     private static void hacerReserva(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                     NUEVA RESERVA                          ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("              NUEVA RESERVA");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Placeholder para ver reservas
     private static void verMisReservas(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                    MIS RESERVAS                            ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("               MIS RESERVAS");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Placeholder para buscar reserva
     private static void buscarReserva(){
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                   BUSCAR RESERVA                           ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("              BUSCAR RESERVA");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Placeholder para cancelar reserva
     private static void cancelarReserva() {
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                  CANCELAR RESERVA                          ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("             CANCELAR RESERVA");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Placeholder para estadisticas
     private static void verEstadisticas() {
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                    ESTADÍSTICAS                            ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n⏳ Funcion en desarrollo...");
+        System.out.println("\n");
+        System.out.println("  ==========================================");
+        System.out.println("              ESTADISTICAS");
+        System.out.println("  ==========================================\n");
+        System.out.println("  [!] Funcion en desarrollo...\n");
     }
     
     //Mensaje de despedida
     private static void mostrarDespedida() {
         limpiarConsola();
-        System.out.println("╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║                                                            ║");
-        System.out.println("║         ¡Gracias por usar TARBO-RED!                      ║");
-        System.out.println("║         Esperamos verlo pronto.                            ║");
-        System.out.println("║                                                            ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
+        System.out.println("\n\n");
+        System.out.println("  ================================================");
+        System.out.println("                                                  ");
+        System.out.println("           Gracias por usar TARBO-RED!           ");
+        System.out.println("            Esperamos verlo pronto.              ");
+        System.out.println("                                                  ");
+        System.out.println("  ================================================");
+        System.out.println("\n");
     }
     
     //Interrumpe la ejecucion hasta accion del usuario
     private static void pausar(){
-        System.out.println("\n[Presione ENTER para continuar...]");
+        System.out.println("  [Presione ENTER para continuar...]");
         sc.nextLine();
     }
     
     //CLS
-    private static void limpiarConsola(){
-        System.out.println("\033[H\033[2J");
-        System.out.flush();
+    private static void limpiarConsola() {
+        for (int i = 0; i < 50; i++) {
+            System.out.println();
+        }
     }
 }

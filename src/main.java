@@ -1,6 +1,7 @@
 
 import java.io.PrintStream;
 import java.util.Scanner;
+import servicio.gestorCartelera;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -13,6 +14,7 @@ import java.util.Scanner;
  */
 public class main {
     private static Scanner sc = new Scanner(System.in);
+    private static gestorCartelera gestorCartelera = new gestorCartelera();
     
     public static void main(String[] args){
         try{
@@ -117,7 +119,11 @@ public class main {
         System.out.println("  ==========================================");
         System.out.println("          CARTELERA DE PELICULAS");
         System.out.println("  ==========================================\n");
-        System.out.println("  [!] Funcion en desarrollo...\n");
+        
+        gestorCartelera.mostrarCartelera();
+        
+        System.out.println("\n Nota: Los precios mostrados son base.");
+        System.out.println("    Se aplicaran descuentos segun el perfil del cliente.\n");
     }
     
     //Placeholder para hacer reserva

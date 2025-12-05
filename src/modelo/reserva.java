@@ -101,33 +101,33 @@ public class reserva {
     //Salida completa de la reserva
     public String toString(){
         return String.format(
-           "╔════════════════════════════════════════════════════════════╗\n" +
-            "║              COMPROBANTE DE RESERVA                        ║\n" +
-            "╠════════════════════════════════════════════════════════════╣\n" +
-            "║ Código: %-50s ║\n" +
-            "║ Fecha: %-51s ║\n" +
-            "╠════════════════════════════════════════════════════════════╣\n" +
-            "║ Cliente: %-49s ║\n" +
-            "║ Edad: %-52d ║\n" +
-            "║ Tipo: %-52s ║\n" +
-            "╠════════════════════════════════════════════════════════════╣\n" +
-            "║ Película: %-48s ║\n" +
-            "║ Horario: %-49s ║\n" +
-            "║ Cantidad: %-48d ║\n" +
-            "╠════════════════════════════════════════════════════════════╣\n" +
-            "║ Precio por boleto: S/ %-35.2f ║\n" +
-            "║ TOTAL A PAGAR: S/ %-39.2f ║\n" +
-            "╚════════════════════════════════════════════════════════════╝",
-                codigo,
-                getFechaFormateada(),
-                cliente.getNombre(),
-                cliente.getEdad(),
-                cliente.getTipoCliente(),
-                pelicula.getTitulo(),
-                horario,
-                cantidadBoletos,
-                getPrecioPorBoleto(),
-                precioTotal
+            "  ================================================================\n" +
+            "                 COMPROBANTE DE RESERVA                           \n" +
+            "  ================================================================\n" +
+            "  Codigo de reserva: %s\n" +
+            "  Fecha: %s\n" +
+            "  ----------------------------------------------------------------\n" +
+            "  Cliente: %s\n" +
+            "  Edad: %d años\n" +
+            "  Tipo: %s\n" +
+            "  ----------------------------------------------------------------\n" +
+            "  Pelicula: %s\n" +
+            "  Horario: %s\n" +
+            "  Cantidad de boletos: %d\n" +
+            "  ----------------------------------------------------------------\n" +
+            "  Precio por boleto: S/ %.2f\n" +
+            "  TOTAL PAGADO: S/ %.2f\n" +
+            "  ================================================================",
+            codigo,
+            getFechaFormateada(),
+            cliente.getNombre(),
+            cliente.getEdad(),
+            cliente.getTipoCliente(),
+            pelicula.getTitulo(),
+            horario,
+            cantidadBoletos,
+            getPrecioPorBoleto(),
+            precioTotal
         );
     }
     

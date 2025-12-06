@@ -157,7 +157,6 @@ public class main {
 
             pelicula peliculaSeleccionada = gestorCartelera.obtenerPeliculaPorIndice(indicePelicula - 1);
 
-            // Paso 3: Mostrar y seleccionar horario
             System.out.println();
             gestorCartelera.mostrarHorarios(peliculaSeleccionada);
 
@@ -209,7 +208,6 @@ public class main {
                 precioTotal
             );
 
-            // Paso 12: Mostrar comprobante
             limpiarConsola();
             System.out.println("\n  [✓] RESERVA REALIZADA CON EXITO!\n");
             System.out.println(nuevaReserva.toString());

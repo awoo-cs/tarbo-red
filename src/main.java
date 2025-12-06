@@ -7,6 +7,7 @@ import modelo.reserva;
 import servicio.calculadoraTarifas;
 import servicio.gestorCartelera;
 import servicio.gestorReservas;
+import utilidades.validador;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -107,14 +108,14 @@ public class main {
     }
     
     //Leer opcion validada
-    private static int leerOpcion(){
-        try{
-            return sc.nextInt();
-        }catch (Exception e){
-            sc.nextLine();
-            return -1;
-        }finally{
-            sc.nextLine();
+    private static int leerOpcion() {
+        try {
+            int opcion = sc.nextInt();
+            sc.nextLine(); 
+            return opcion;
+        } catch (java.util.InputMismatchException e) {
+            sc.nextLine(); 
+            return -1; 
         }
     }
     
@@ -133,114 +134,92 @@ public class main {
     }
     
     //Placeholder para hacer reserva
-    private static void hacerReserva(){
+    private static void hacerReserva() {
         limpiarConsola();
         System.out.println("\n");
         System.out.println("  ==========================================");
         System.out.println("              NUEVA RESERVA");
         System.out.println("  ==========================================\n");
-        
-        gestorCartelera.mostrarCarteleraCompacta();
-        
-        System.out.println("    Selecciones el numero de pelicula (0 para cancelar): ");
-        int indicePelicula = leerOpcion();
-        
-        if(indicePelicula == 0){
-            System.out.println("\n  [!] Reserva cancelada.\n");
+
+        try {
+            gestorCartelera.mostrarCarteleraCompacta();
+
+            int indicePelicula = leerEnteroValidado(
+                "  Seleccione el numero de pelicula (0 para cancelar): ",
+                0,
+                gestorCartelera.getCantidadPeliculas()
+            );
+
+            if (indicePelicula == 0) {
+                System.out.println("\n  [!] Reserva cancelada.\n");
+                return;
+            }
+
+            pelicula peliculaSeleccionada = gestorCartelera.obtenerPeliculaPorIndice(indicePelicula - 1);
+
+            // Paso 3: Mostrar y seleccionar horario
+            System.out.println();
+            gestorCartelera.mostrarHorarios(peliculaSeleccionada);
+
+            String[] horarios = peliculaSeleccionada.getHorarios();
+            int indiceHorario = leerEnteroValidado(
+                "\n  Seleccione el numero de horario: ",
+                1,
+                horarios.length
+            );
+
+            String horarioSeleccionado = horarios[indiceHorario - 1];
+
+            System.out.println("\n  " + "-".repeat(50));
+            System.out.println("  DATOS DEL CLIENTE");
+            System.out.println("  " + "-".repeat(50));
+
+            String nombre = leerNombreValidado("  Nombre completo: ");
+            int edad = leerEdadValidada("  Edad: ");
+            boolean esEstudiante = leerRespuestaSN("  ¿Es estudiante? (S/N): ");
+
+            int cantidad = leerEnteroValidado("  Cantidad de boletos (1-10): ", 1, 10);
+
+            boolean esMiercoles = leerRespuestaSN("  ¿La funcion es en miercoles? (S/N): ");
+            boolean esEstreno = leerRespuestaSN("  ¿Es una pelicula en estreno? (S/N): ");
+
+            cliente cliente = new cliente(nombre, edad, esEstudiante);
+
+            double precioBase = peliculaSeleccionada.getPrecioBase();
+            double precioTotal = calculadoraTarifas.calcularPrecio(
+                precioBase, cliente, esMiercoles, esEstreno, cantidad
+            );
+
+            System.out.println(calculadoraTarifas.obtenerDesglose(
+                precioBase, cliente, esMiercoles, esEstreno, cantidad
+            ));
+
+            boolean confirmar = leerRespuestaSN("  ¿Confirmar reserva? (S/N): ");
+
+            if (!confirmar) {
+                System.out.println("\n  [!] Reserva cancelada.\n");
+                return;
+            }
+
+            reserva nuevaReserva = gestorReservas.crearReserva(
+                cliente,
+                peliculaSeleccionada,
+                horarioSeleccionado,
+                cantidad,
+                precioTotal
+            );
+
+            // Paso 12: Mostrar comprobante
+            limpiarConsola();
+            System.out.println("\n  [✓] RESERVA REALIZADA CON EXITO!\n");
+            System.out.println(nuevaReserva.toString());
+            System.out.println("\n  Guarde su codigo de reserva: " + nuevaReserva.getCodigo());
+            System.out.println("  Lo necesitara para consultar o cancelar su reserva.\n");
+
+        } catch (Exception e) {
+            System.out.println("\n  [X] Error inesperado: " + e.getMessage());
+            System.out.println("  Por favor intente nuevamente.\n");
         }
-        
-        if(!gestorCartelera.indiceValido(indicePelicula)){
-            System.out.println("\n  [X] Pelicula invalida.\n");
-            return;
-        }
-        
-        pelicula peliculaSeleccionada = gestorCartelera.obtenerPeliculaPorIndice(indicePelicula - 1);
-        
-        System.out.println();
-        gestorCartelera.mostrarHorarios(peliculaSeleccionada);
-        System.out.println("\n Seleccione el numero de horario: ");
-        int indiceHorario = leerOpcion();
-        
-        String[] horarios = peliculaSeleccionada.getHorarios();
-        if(indiceHorario < 1 || indiceHorario > horarios.length){
-            System.out.println("\n [X] Horario invalido.\n");
-            return;
-        }
-        
-        String horarioSeleccionado = horarios[indiceHorario - 1];
-        
-        System.out.println("\n  " + "-".repeat(50));
-        System.out.println("  DATOS DEL CLIENTE");
-        System.out.println("  " + "-".repeat(50));
-        
-        System.out.println(" Nombre completo ");
-        String nombre = sc.nextLine().trim();
-        
-        if(nombre.isEmpty()){
-            System.out.println("\n [X] El nombre no puede estar vacio.\n");
-            return;
-        }
-        
-        System.out.println(" Edad: ");
-        int edad = leerOpcion();
-        
-        if(edad < 0 || edad > 120){
-            System.out.println("\n [X] Edad invalida.\n");
-            return;
-        }
-        
-        System.out.println(" Es estudiante? (S/N)");
-        String respuestaEstudiante = sc.nextLine().trim().toUpperCase();
-        boolean esEstudiante = respuestaEstudiante.equals("S");
-        
-        System.out.println(" Cantidad de boletos: ");
-        int cantidad = leerOpcion();
-        
-        if(cantidad < 1 || cantidad > 10){
-            System.out.println("\n [X] Cantidad invalida (1-10 boletos).\n");
-            return;
-        }
-        
-        System.out.print("  La funcion es en miercoles? (S/N): ");
-        String respuestaMiercoles = sc.nextLine().trim().toUpperCase();
-        boolean esMiercoles = respuestaMiercoles.equals("S");
-
-        System.out.print("  Es una pelicula en estreno? (S/N): ");
-        String respuestaEstreno = sc.nextLine().trim().toUpperCase();
-        boolean esEstreno = respuestaEstreno.equals("S");
-
-        cliente cliente = new cliente(nombre, edad, esEstudiante);
-
-        double precioBase = peliculaSeleccionada.getPrecioBase();
-        double precioTotal = calculadoraTarifas.calcularPrecio(
-            precioBase, cliente, esMiercoles, esEstreno, cantidad
-        );
-
-        System.out.println(calculadoraTarifas.obtenerDesglose(
-            precioBase, cliente, esMiercoles, esEstreno, cantidad
-        ));
-
-        System.out.print("  Confirmar reserva? (S/N): ");
-        String confirmacion = sc.nextLine().trim().toUpperCase();
-
-        if (!confirmacion.equals("S")) {
-            System.out.println("\n  [!] Reserva cancelada.\n");
-            return;
-        }
-
-        reserva nuevaReserva = gestorReservas.crearReserva(
-            cliente,
-            peliculaSeleccionada,
-            horarioSeleccionado,
-            cantidad,
-            precioTotal
-        );
-
-        limpiarConsola();
-        System.out.println("\n  [✓] RESERVA REALIZADA CON EXITO!\n");
-        System.out.println(nuevaReserva.toString());
-        System.out.println("\n  Guarde su codigo de reserva: " + nuevaReserva.getCodigo());
-        System.out.println("  Lo necesitara para consultar o cancelar su reserva.\n");
     }
     
     //Placeholder para ver reservas
@@ -316,6 +295,75 @@ public class main {
     private static void limpiarConsola() {
         for (int i = 0; i < 50; i++) {
             System.out.println();
+        }
+    }
+    
+    //Metodos aux
+    //Leer un numero entero validado
+    private static int leerEnteroValidado(String mensaje, int min, int max){
+        while(true){
+            try{
+                System.out.println(mensaje);
+                int valor = sc.nextInt();
+                sc.nextLine();
+                
+                if(valor >= min && valor <= max){
+                    return valor;
+                }else{
+                    System.out.println("\n [X] Error: Ingrese un numero entre " + min + " y " + max + ".\n");
+                }
+            }catch(java.util.InputMismatchException e){
+                sc.nextLine();
+                System.out.println("\n [X] Error: Debe ingresar un numero valido.\n");
+            }
+        }
+    }
+    
+    //Lee una respuesta S/N validada
+    private static boolean leerRespuestaSN(String mensaje){
+        while(true){
+            System.out.println(mensaje);
+            String respuesta = sc.nextLine().trim().toUpperCase();
+            
+            if(validador.validarRespuestaSN(respuesta)){
+                return validador.convertirRespuestaSN(respuesta);
+            }else{
+                System.out.println("\n [X] Error: Responda con S(Si) o N(No).\n");
+            }
+        }
+    }
+    
+    //Lee un nombre validado
+    private static String leerNombreValidado(String mensaje){
+        while(true){
+            System.out.println(mensaje);
+            String nombre = sc.nextLine().trim();
+            
+            if(validador.validarNombre(nombre)){
+                return nombre;
+            }else{
+                System.out.println("\n [X] Error: " + validador.getMensajeErrorNombre(nombre) + "\n");
+            }
+        }
+    }
+    
+    //Lee una edad validada
+    private static int leerEdadValidada(String mensaje){
+        while(true){
+            try{
+                System.out.println(mensaje);
+                int edad = sc.nextInt();
+                sc.nextLine();
+                
+                if(validador.validarEdad(edad)){
+                    return edad;
+                }else{
+                    System.out.println("\n [X] Error: " + validador.getMensajeErrorEdad(edad) + "\n");
+                }
+            }catch (java.util.InputMismatchException e){
+                sc.nextLine();
+                System.out.println("\n [X] Error: La edad debe ser un numero.\n");
+            }
         }
     }
 }

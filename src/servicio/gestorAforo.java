@@ -122,7 +122,7 @@ public class gestorAforo {
             estado = "AMPLIA DISPONIBILIDAD";
         }
         
-        return String.format("%s (%d/%d asientos", estado, ocupados, CAPACIDAD_MAXIMA);
+        return String.format("%s (%d/%d asientos)", estado, ocupados, CAPACIDAD_MAXIMA);
     }
     
     //Reinicia el aforo de todas las funciones (util)

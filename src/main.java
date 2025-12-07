@@ -317,13 +317,117 @@ public class main {
     }
     
     //Placeholder para buscar reserva
-    private static void buscarReserva(){
+    private static void buscarReserva() {
         limpiarConsola();
         System.out.println("\n");
         System.out.println("  ==========================================");
         System.out.println("              BUSCAR RESERVA");
         System.out.println("  ==========================================\n");
-        System.out.println("  [!] Funcion en desarrollo...\n");
+
+        if (!gestorReservas.hayReservas()) {
+            System.out.println("  [!] No hay reservas registradas en el sistema.\n");
+            return;
+        }
+
+        System.out.println("  Opciones de busqueda:");
+        System.out.println("  [1] Buscar por codigo de reserva");
+        System.out.println("  [2] Buscar por nombre del cliente");
+        System.out.println("  [0] Cancelar\n");
+
+        int opcion = leerEnteroValidado("  Seleccione una opcion: ", 0, 2);
+
+        if (opcion == 0) {
+            System.out.println("\n  [!] Busqueda cancelada.\n");
+            return;
+        }
+
+        try {
+            if (opcion == 1) {
+                System.out.print("\n  Ingrese el codigo de reserva (ej: RES001): ");
+                String codigo = sc.nextLine().trim().toUpperCase();
+
+                if (codigo.isEmpty()) {
+                    System.out.println("\n  [X] El codigo no puede estar vacio.\n");
+                    return;
+                }
+
+                reserva reserva = gestorReservas.buscarReservaPorCodigo(codigo);
+
+                if (reserva == null) {
+                    System.out.println("\n  [X] No se encontro ninguna reserva con el codigo: " + codigo);
+                    System.out.println("  Verifique el codigo e intente nuevamente.\n");
+                } else {
+                    System.out.println("\n  [✓] RESERVA ENCONTRADA:\n");
+                    System.out.println(reserva.toString());
+
+                    int disponibles = gestorAforo.getAsientosDisponibles(
+                        reserva.getPelicula().getTitulo(),
+                        reserva.getHorario()
+                    );
+                    System.out.println("\n  Estado actual de la funcion:");
+                    System.out.println("  " + gestorAforo.getEstadoAforo(
+                        reserva.getPelicula().getTitulo(),
+                        reserva.getHorario()
+                    ));
+                    System.out.println();
+                }
+
+            } else if (opcion == 2) {
+                System.out.print("\n  Ingrese el nombre (o parte del nombre) del cliente: ");
+                String nombre = sc.nextLine().trim();
+
+                if (nombre.isEmpty()) {
+                    System.out.println("\n  [X] El nombre no puede estar vacio.\n");
+                    return;
+                }
+
+                ArrayList<reserva> reservasEncontradas = gestorReservas.buscarReservasPorNombre(nombre);
+
+                if (reservasEncontradas.isEmpty()) {
+                    System.out.println("\n  [X] No se encontraron reservas para: " + nombre);
+                    System.out.println("  Intente con otro nombre o parte del nombre.\n");
+                } else {
+                    System.out.println("\n  [✓] SE ENCONTRARON " + reservasEncontradas.size() + " RESERVA(S):\n");
+                    System.out.println("  " + "=".repeat(100));
+                    System.out.println("  CODIGO   | CLIENTE              | PELICULA                  | HORARIO | BOLETOS | TOTAL");
+                    System.out.println("  " + "=".repeat(100));
+
+                    for (reserva r : reservasEncontradas) {
+                        System.out.printf("  %-8s | %-20s | %-25s | %-7s | %-7d | S/ %.2f\n",
+                            r.getCodigo(),
+                            truncar(r.getCliente().getNombre(), 20),
+                            truncar(r.getPelicula().getTitulo(), 25),
+                            r.getHorario(),
+                            r.getCantidadBoletos(),
+                            r.getPrecioTotal()
+                        );
+                    }
+
+                    System.out.println("  " + "=".repeat(100) + "\n");
+
+                    boolean verDetalles = leerRespuestaSN("  Desea ver los detalles de alguna reserva? (S/N): ");
+
+                    if (verDetalles) {
+                        System.out.print("  Ingrese el codigo de la reserva: ");
+                        String codigoDetalle = sc.nextLine().trim().toUpperCase();
+
+                        reserva reservaDetalle = gestorReservas.buscarReservaPorCodigo(codigoDetalle);
+
+                        if (reservaDetalle != null) {
+                            System.out.println("\n");
+                            System.out.println(reservaDetalle.toString());
+                            System.out.println();
+                        } else {
+                            System.out.println("\n  [X] Codigo no encontrado.\n");
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("\n  [X] Error al buscar reserva: " + e.getMessage());
+            System.out.println("  Por favor intente nuevamente.\n");
+        }
     }
     
     //Placeholder para cancelar reserva
@@ -331,9 +435,111 @@ public class main {
         limpiarConsola();
         System.out.println("\n");
         System.out.println("  ==========================================");
-        System.out.println("             CANCELAR RESERVA");
+        System.out.println("            CANCELAR RESERVA");
         System.out.println("  ==========================================\n");
-        System.out.println("  [!] Funcion en desarrollo...\n");
+
+        if (!gestorReservas.hayReservas()) {
+            System.out.println("  [!] No hay reservas registradas en el sistema.\n");
+            return;
+        }
+
+        System.out.println("  Para cancelar una reserva necesita su codigo.");
+        System.out.println("  Si no lo recuerda, use la opcion 'Buscar Reserva' primero.\n");
+
+        try {
+            System.out.print("  Ingrese el codigo de reserva (o 0 para cancelar): ");
+            String codigo = sc.nextLine().trim().toUpperCase();
+
+            if (codigo.equals("0")) {
+                System.out.println("\n  [!] Operacion cancelada.\n");
+                return;
+            }
+
+            if (codigo.isEmpty()) {
+                System.out.println("\n  [X] El codigo no puede estar vacio.\n");
+                return;
+            }
+
+            reserva reserva = gestorReservas.buscarReservaPorCodigo(codigo);
+
+            if (reserva == null) {
+                System.out.println("\n  [X] No se encontro ninguna reserva con el codigo: " + codigo);
+                System.out.println("  Verifique el codigo e intente nuevamente.\n");
+                return;
+            }
+
+            System.out.println("\n  RESERVA ENCONTRADA:\n");
+            System.out.println("  " + "=".repeat(70));
+            System.out.println("  Codigo: " + reserva.getCodigo());
+            System.out.println("  Cliente: " + reserva.getCliente().getNombre());
+            System.out.println("  Pelicula: " + reserva.getPelicula().getTitulo());
+            System.out.println("  Horario: " + reserva.getHorario());
+            System.out.println("  Cantidad de boletos: " + reserva.getCantidadBoletos());
+            System.out.println("  Total pagado: S/ " + String.format("%.2f", reserva.getPrecioTotal()));
+            System.out.println("  Fecha de reserva: " + reserva.getFechaFormateada());
+            System.out.println("  " + "=".repeat(70) + "\n");
+
+            System.out.println("  [!] ADVERTENCIA:");
+            System.out.println("  Esta accion es IRREVERSIBLE. La reserva sera eliminada del sistema.");
+            System.out.println("  Los asientos seran liberados para otros clientes.\n");
+
+            boolean confirmar = leerRespuestaSN("  Esta seguro que desea CANCELAR esta reserva? (S/N): ");
+
+            if (!confirmar) {
+                System.out.println("\n  [!] Cancelacion abortada. La reserva se mantiene activa.\n");
+                return;
+            }
+
+            System.out.print("\n  Por favor confirme nuevamente escribiendo 'CONFIRMAR': ");
+            String confirmacionFinal = sc.nextLine().trim().toUpperCase();
+
+            if (!confirmacionFinal.equals("CONFIRMAR")) {
+                System.out.println("\n  [!] Cancelacion abortada. La reserva se mantiene activa.\n");
+                return;
+            }
+
+            String nombreCliente = reserva.getCliente().getNombre();
+            String tituloPelicula = reserva.getPelicula().getTitulo();
+            String horario = reserva.getHorario();
+            int cantidadBoletos = reserva.getCantidadBoletos();
+            double montoDevolver = reserva.getPrecioTotal();
+
+            gestorAforo.liberarReserva(
+                reserva.getPelicula().getTitulo(),
+                reserva.getHorario(),
+                reserva.getCantidadBoletos()
+            );
+
+            boolean cancelado = gestorReservas.cancelarReserva(codigo);
+
+            if (cancelado) {
+                limpiarConsola();
+                System.out.println("\n");
+                System.out.println("  ================================================================");
+                System.out.println("                  RESERVA CANCELADA EXITOSAMENTE");
+                System.out.println("  ================================================================\n");
+                System.out.println("  Codigo de reserva: " + codigo);
+                System.out.println("  Cliente: " + nombreCliente);
+                System.out.println("  Pelicula: " + tituloPelicula);
+                System.out.println("  Horario: " + horario);
+                System.out.println("  Boletos liberados: " + cantidadBoletos);
+                System.out.println("  Monto a devolver: S/ " + String.format("%.2f", montoDevolver));
+                System.out.println("\n  Los asientos han sido liberados y estan disponibles nuevamente.");
+
+                int disponiblesAhora = gestorAforo.getAsientosDisponibles(tituloPelicula, horario);
+                System.out.println("  Asientos disponibles ahora para esta funcion: " + disponiblesAhora);
+                System.out.println("\n  Gracias por utilizar nuestro sistema.");
+                System.out.println("  ================================================================\n");
+
+            } else {
+                System.out.println("\n  [X] Error inesperado al cancelar la reserva.");
+                System.out.println("  Por favor intente nuevamente o contacte al administrador.\n");
+            }
+
+        } catch (Exception e) {
+            System.out.println("\n  [X] Error al cancelar reserva: " + e.getMessage());
+            System.out.println("  Por favor intente nuevamente.\n");
+        }
     }
     
     //Placeholder para estadisticas
@@ -439,5 +645,13 @@ public class main {
                 System.out.println("\n [X] Error: La edad debe ser un numero.\n");
             }
         }
+    }
+    
+    //Metodo aux para truncar strings largo
+    private static String truncar(String texto, int maxLength) {
+        if (texto.length() <= maxLength) {
+            return texto;
+        }
+        return texto.substring(0, maxLength - 3) + "...";
     }
 }

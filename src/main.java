@@ -1,10 +1,12 @@
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Scanner;
 import modelo.cliente;
 import modelo.pelicula;
 import modelo.reserva;
 import servicio.calculadoraTarifas;
+import servicio.gestorAforo;
 import servicio.gestorCartelera;
 import servicio.gestorReservas;
 import utilidades.validador;
@@ -22,6 +24,7 @@ public class main {
     private static Scanner sc = new Scanner(System.in);
     private static gestorCartelera gestorCartelera = new gestorCartelera();
     private static gestorReservas gestorReservas = new gestorReservas();
+    private static gestorAforo gestorAforo = new gestorAforo();
     
     public static void main(String[] args){
         try{
@@ -32,6 +35,8 @@ public class main {
         
         
         mostrarBienvenida();
+        
+        gestorAforo.inicializarAforo(gestorCartelera.obtenerPeliculas());
         
         boolean salir = false;
         
@@ -120,17 +125,38 @@ public class main {
     }
     
     //Placeholder para visualizar la cartelera
-    private static void verCartelera(){
+    private static void verCartelera() {
         limpiarConsola();
         System.out.println("\n");
         System.out.println("  ==========================================");
         System.out.println("          CARTELERA DE PELICULAS");
-        System.out.println("  ==========================================\n");
-        
-        gestorCartelera.mostrarCartelera();
-        
-        System.out.println("\n Nota: Los precios mostrados son base.");
-        System.out.println("    Se aplicaran descuentos segun el perfil del cliente.");
+        System.out.println("  ==========================================");
+
+        System.out.println("\n  PELICULAS DISPONIBLES:");
+        System.out.println("  " + "=".repeat(90) + "\n");
+
+        ArrayList<pelicula> peliculas = gestorCartelera.obtenerPeliculas();
+
+        for (int i = 0; i < peliculas.size(); i++) {
+            pelicula p = peliculas.get(i);
+            System.out.println("  [" + (i + 1) + "] " + p.getTitulo());
+            System.out.println("      Genero: " + p.getGenero());
+            System.out.println("      Duracion: " + p.getDuracion() + " minutos");
+            System.out.println("      Precio base: S/ " + String.format("%.2f", p.getPrecioBase()));
+            System.out.println("      Horarios disponibles:");
+
+            // Mostrar horarios con disponibilidad
+            for (String horario : p.getHorarios()) {
+                int disponibles = gestorAforo.getAsientosDisponibles(p.getTitulo(), horario);
+                String estado = gestorAforo.getEstadoAforo(p.getTitulo(), horario);
+                System.out.printf("        - %s : %s\n", horario, estado);
+            }
+            System.out.println();
+        }
+
+        System.out.println("  " + "=".repeat(90));
+        System.out.println("\n  Nota: Capacidad maxima por funcion: " + gestorAforo.CAPACIDAD_MAXIMA + " asientos");
+        System.out.println("  Los precios mostrados son base. Se aplicaran descuentos segun perfil.\n");
     }
     
     //Placeholder para hacer reserva
@@ -158,9 +184,16 @@ public class main {
             pelicula peliculaSeleccionada = gestorCartelera.obtenerPeliculaPorIndice(indicePelicula - 1);
 
             System.out.println();
-            gestorCartelera.mostrarHorarios(peliculaSeleccionada);
+            System.out.println("  HORARIOS DISPONIBLES PARA: " + peliculaSeleccionada.getTitulo());
+            System.out.println("  " + "-".repeat(70));
 
             String[] horarios = peliculaSeleccionada.getHorarios();
+            for (int i = 0; i < horarios.length; i++) {
+                String estado = gestorAforo.getEstadoAforo(peliculaSeleccionada.getTitulo(), horarios[i]);
+                System.out.printf("  [%d] %s - %s\n", (i + 1), horarios[i], estado);
+            }
+            System.out.println("  " + "-".repeat(70));
+
             int indiceHorario = leerEnteroValidado(
                 "\n  Seleccione el numero de horario: ",
                 1,
@@ -169,18 +202,43 @@ public class main {
 
             String horarioSeleccionado = horarios[indiceHorario - 1];
 
+            int disponibles = gestorAforo.getAsientosDisponibles(
+                peliculaSeleccionada.getTitulo(), 
+                horarioSeleccionado
+            );
+
+            System.out.println("\n  Asientos disponibles para esta funcion: " + disponibles);
+
+            if (disponibles == 0) {
+                System.out.println("\n  [X] Lo sentimos, esta funcion esta LLENA.");
+                System.out.println("  Por favor seleccione otro horario.\n");
+                return;
+            }
+
+            int maxBoletos = Math.min(10, disponibles);
+            int cantidad = leerEnteroValidado(
+                "  Cantidad de boletos (1-" + maxBoletos + "): ", 
+                1, 
+                maxBoletos
+            );
+
+            if (!gestorAforo.hayDisponibilidad(peliculaSeleccionada.getTitulo(), horarioSeleccionado, cantidad)) {
+                System.out.println("\n  [X] Lo sentimos, no hay suficientes asientos disponibles.");
+                System.out.println("  Asientos disponibles: " + disponibles);
+                System.out.println("  Boletos solicitados: " + cantidad + "\n");
+                return;
+            }
+
             System.out.println("\n  " + "-".repeat(50));
             System.out.println("  DATOS DEL CLIENTE");
             System.out.println("  " + "-".repeat(50));
 
             String nombre = leerNombreValidado("  Nombre completo: ");
             int edad = leerEdadValidada("  Edad: ");
-            boolean esEstudiante = leerRespuestaSN("  ¿Es estudiante? (S/N): ");
+            boolean esEstudiante = leerRespuestaSN("  Es estudiante? (S/N): ");
 
-            int cantidad = leerEnteroValidado("  Cantidad de boletos (1-10): ", 1, 10);
-
-            boolean esMiercoles = leerRespuestaSN("  ¿La funcion es en miercoles? (S/N): ");
-            boolean esEstreno = leerRespuestaSN("  ¿Es una pelicula en estreno? (S/N): ");
+            boolean esMiercoles = leerRespuestaSN("  La funcion es en miercoles? (S/N): ");
+            boolean esEstreno = leerRespuestaSN("  Es una pelicula en estreno? (S/N): ");
 
             cliente cliente = new cliente(nombre, edad, esEstudiante);
 
@@ -200,6 +258,18 @@ public class main {
                 return;
             }
 
+            boolean aforoRegistrado = gestorAforo.registrarReserva(
+                peliculaSeleccionada.getTitulo(),
+                horarioSeleccionado,
+                cantidad
+            );
+
+            if (!aforoRegistrado) {
+                System.out.println("\n  [X] Error: No se pudo registrar la reserva en el aforo.");
+                System.out.println("  Por favor intente nuevamente.\n");
+                return;
+            }
+
             reserva nuevaReserva = gestorReservas.crearReserva(
                 cliente,
                 peliculaSeleccionada,
@@ -212,7 +282,13 @@ public class main {
             System.out.println("\n  [✓] RESERVA REALIZADA CON EXITO!\n");
             System.out.println(nuevaReserva.toString());
             System.out.println("\n  Guarde su codigo de reserva: " + nuevaReserva.getCodigo());
-            System.out.println("  Lo necesitara para consultar o cancelar su reserva.\n");
+            System.out.println("  Lo necesitara para consultar o cancelar su reserva.");
+
+            int disponiblesAhora = gestorAforo.getAsientosDisponibles(
+                peliculaSeleccionada.getTitulo(), 
+                horarioSeleccionado
+            );
+            System.out.println("\n  Asientos restantes para esta funcion: " + disponiblesAhora + "\n");
 
         } catch (Exception e) {
             System.out.println("\n  [X] Error inesperado: " + e.getMessage());

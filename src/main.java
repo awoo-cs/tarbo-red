@@ -1,6 +1,7 @@
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import modelo.cliente;
 import modelo.pelicula;
@@ -547,9 +548,145 @@ public class main {
         limpiarConsola();
         System.out.println("\n");
         System.out.println("  ==========================================");
-        System.out.println("              ESTADISTICAS");
+        System.out.println("              ESTADISTICAS DEL SISTEMA");
         System.out.println("  ==========================================\n");
-        System.out.println("  [!] Funcion en desarrollo...\n");
+
+        if (!gestorReservas.hayReservas()) {
+            System.out.println("  [!] No hay suficientes datos para generar estadisticas.");
+            System.out.println("  Realice algunas reservas primero.\n");
+            return;
+        }
+
+        System.out.println("  " + "=".repeat(70));
+        System.out.println("  ESTADISTICAS GENERALES");
+        System.out.println("  " + "=".repeat(70));
+
+        int totalReservas = gestorReservas.getCantidadReservas();
+        int totalBoletos = gestorReservas.getTotalBoletosVendidos();
+        double ingresoTotal = gestorReservas.getIngresoTotal();
+        double promedioBoletosReserva = (double) totalBoletos / totalReservas;
+        double promedioIngresoReserva = ingresoTotal / totalReservas;
+
+        System.out.println("\n  Total de reservas realizadas:     " + totalReservas);
+        System.out.println("  Total de boletos vendidos:        " + totalBoletos);
+        System.out.println("  Ingresos totales recaudados:      S/ " + String.format("%.2f", ingresoTotal));
+        System.out.println("  Promedio boletos por reserva:     " + String.format("%.1f", promedioBoletosReserva));
+        System.out.println("  Promedio de ingreso por reserva:  S/ " + String.format("%.2f", promedioIngresoReserva));
+
+        System.out.println("\n  " + "=".repeat(70));
+        System.out.println("  PELICULAS MAS POPULARES");
+        System.out.println("  " + "=".repeat(70) + "\n");
+
+        HashMap<String, Integer> reservasPorPelicula = new HashMap<>();
+        HashMap<String, Double> ingresosPorPelicula = new HashMap<>();
+
+        for (reserva r : gestorReservas.obtenerReservas()) {
+            String titulo = r.getPelicula().getTitulo();
+
+            reservasPorPelicula.put(titulo, 
+                reservasPorPelicula.getOrDefault(titulo, 0) + 1);
+
+            ingresosPorPelicula.put(titulo,
+                ingresosPorPelicula.getOrDefault(titulo, 0.0) + r.getPrecioTotal());
+        }
+
+        String peliculaMasReservada = "";
+        int maxReservas = 0;
+
+        for (String titulo : reservasPorPelicula.keySet()) {
+            int cantReservas = reservasPorPelicula.get(titulo);
+            if (cantReservas > maxReservas) {
+                maxReservas = cantReservas;
+                peliculaMasReservada = titulo;
+            }
+        }
+
+        System.out.println("  PELICULA                          | RESERVAS | BOLETOS | INGRESOS");
+        System.out.println("  " + "-".repeat(70));
+
+        for (String titulo : reservasPorPelicula.keySet()) {
+            int cantReservas = reservasPorPelicula.get(titulo);
+            double ingresos = ingresosPorPelicula.get(titulo);
+
+            int boletosTotal = 0;
+            for (reserva r : gestorReservas.obtenerReservas()) {
+                if (r.getPelicula().getTitulo().equals(titulo)) {
+                    boletosTotal += r.getCantidadBoletos();
+                }
+            }
+
+            String marcador = titulo.equals(peliculaMasReservada) ? " ★" : "";
+            System.out.printf("  %-33s | %-8d | %-7d | S/ %.2f%s\n",
+                truncar(titulo, 33), cantReservas, boletosTotal, ingresos, marcador);
+        }
+
+        System.out.println("\n  ★ = Pelicula mas reservada");
+
+        System.out.println("\n  " + "=".repeat(70));
+        System.out.println("  ESTADISTICAS DE AFORO");
+        System.out.println("  " + "=".repeat(70) + "\n");
+
+        int totalAsientosVendidos = gestorAforo.getTotalAsientosVendidos();
+        double ocupacionPromedio = gestorAforo.getOcupacionPromedio();
+        String funcionMasPopular = gestorAforo.getFuncionMasPopular();
+
+        System.out.println("  Total de asientos vendidos:       " + totalAsientosVendidos);
+        System.out.println("  Ocupacion promedio general:        " + String.format("%.1f%%", ocupacionPromedio));
+        System.out.println("  Funcion mas popular:               " + funcionMasPopular);
+
+        // ===== GRÁFICO DE OCUPACIÓN =====
+        System.out.println("\n  " + "=".repeat(70));
+        System.out.println("  GRAFICO DE OCUPACION");
+        System.out.println("  " + "=".repeat(70) + "\n");
+
+        mostrarGraficoOcupacion();
+
+        // ===== TIPOS DE CLIENTES =====
+        System.out.println("\n  " + "=".repeat(70));
+        System.out.println("  DISTRIBUCION DE CLIENTES");
+        System.out.println("  " + "=".repeat(70) + "\n");
+
+        int ninos = 0;
+        int estudiantes = 0;
+        int adultosMayores = 0;
+        int adultos = 0;
+
+        for (reserva r : gestorReservas.obtenerReservas()) {
+            cliente c = r.getCliente();
+            if (c.esNino()) {
+                ninos++;
+            } else if (c.esAdultoMayor()) {
+                adultosMayores++;
+            } else if (c.isEsEstudiante()) {
+                estudiantes++;
+            } else {
+                adultos++;
+            }
+        }
+
+        int totalClientes = totalReservas;
+
+        System.out.println("  Ninos (< 12 años):           " + ninos + 
+            " (" + String.format("%.1f%%", (ninos * 100.0 / totalClientes)) + ")");
+        System.out.println("  Estudiantes:                 " + estudiantes + 
+            " (" + String.format("%.1f%%", (estudiantes * 100.0 / totalClientes)) + ")");
+        System.out.println("  Adultos mayores (>= 60):     " + adultosMayores + 
+            " (" + String.format("%.1f%%", (adultosMayores * 100.0 / totalClientes)) + ")");
+        System.out.println("  Adultos generales:           " + adultos + 
+            " (" + String.format("%.1f%%", (adultos * 100.0 / totalClientes)) + ")");
+
+        System.out.println("\n  " + "=".repeat(70));
+        System.out.println("  RESUMEN EJECUTIVO");
+        System.out.println("  " + "=".repeat(70) + "\n");
+
+        System.out.println("  Estado del sistema:");
+        System.out.println("  - Total de peliculas en cartelera:  " + gestorCartelera.getCantidadPeliculas());
+        System.out.println("  - Total de funciones disponibles:   " + contarFuncionesTotal());
+        System.out.println("  - Capacidad total del cine:          " + (contarFuncionesTotal() * gestorAforo.CAPACIDAD_MAXIMA) + " asientos");
+        System.out.println("  - Asientos vendidos:                 " + totalAsientosVendidos + " asientos");
+        System.out.println("  - Tasa de ocupacion global:          " + String.format("%.1f%%", ocupacionPromedio));
+
+        System.out.println("\n  " + "=".repeat(70) + "\n");
     }
     
     //Mensaje de despedida
@@ -653,5 +790,36 @@ public class main {
             return texto;
         }
         return texto.substring(0, maxLength - 3) + "...";
+    }
+    
+    //Grafico ASCII de ocupacion de las funciones
+    private static void mostrarGraficoOcupacion() {
+        ArrayList<pelicula> peliculas = gestorCartelera.obtenerPeliculas();
+
+        System.out.println("  Nivel de ocupacion por funcion:");
+        System.out.println("  (Cada █ = 10% de ocupacion)\n");
+
+        for (pelicula p : peliculas) {
+            for (String horario : p.getHorarios()) {
+                double ocupacion = gestorAforo.getPorcentajeOcupacion(p.getTitulo(), horario);
+                int barras = (int) Math.round(ocupacion / 10);
+
+                String nombreFuncion = String.format("%-25s %s", 
+                    truncar(p.getTitulo(), 20), horario);
+
+                String grafico = "█".repeat(barras) + "░".repeat(10 - barras);
+
+                System.out.printf("  %s | %s | %5.1f%%\n", nombreFuncion, grafico, ocupacion);
+            }
+        }
+    }
+    
+    //Contar numero total de funciones disponibles
+    private static int contarFuncionesTotal() {
+        int total = 0;
+        for (pelicula p : gestorCartelera.obtenerPeliculas()) {
+            total += p.getHorarios().length;
+        }
+        return total;
     }
 }

@@ -102,7 +102,7 @@ public class gestorReservas {
     }
     
     //Listar reservas
-    public ArrayList<reserva> obtenerReserva(){
+    public ArrayList<reserva> obtenerReservas(){
         return reservas;
     }
     
